@@ -21,6 +21,7 @@ from springpython.context import ApplicationContext
 contextFile=u'context.xml'
 currDir = os.getcwd()
 contextFile=join(currDir, contextFile)
+print(contextFile)
 
 class Kernel:
     """
@@ -44,7 +45,7 @@ def main():
     """
     #TODO: Написать тесты
     context = ApplicationContext(XMLConfig(contextFile))
-    context.get_object("Kernel")
+    objKernel = context.get_object("Kernel")
 
 
 if __name__ == '__main__':
