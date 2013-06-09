@@ -25,7 +25,7 @@ contextFile = join(currDir, contextFile)
 # print(contextFile)
 
 
-class Kernel:
+class Kernel(object):
     """
     Main kernel class
 
