@@ -31,7 +31,14 @@ class Kernel:
 
     """
     #TODO: Написать тесты
-    def __init__( self ):
+    def __init__(self):
+        """
+
+
+        """
+        pass
+
+    def run(self):
         """
 
 
@@ -47,6 +54,7 @@ def main():
     #TODO: Написать тесты
     context = ApplicationContext(XMLConfig(contextFile))
     objKernel = context.get_object("Kernel")
+    objKernel.run()
 
 
 if __name__ == '__main__':
