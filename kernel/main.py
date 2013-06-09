@@ -33,14 +33,14 @@ class Kernel:
     #TODO: Написать тесты
     def __init__(self):
         """
-
+        Sample constructor
 
         """
         pass
 
     def run(self):
         """
-
+        Sample run method
 
         """
         pass
