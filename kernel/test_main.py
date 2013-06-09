@@ -27,11 +27,12 @@ class TestCase(unittest.TestCase):
     def test_starting_out( self ):
         self.assertEqual(1, 1)
 
-    def setUp( self ):
-        self.main = Kernel
+    # def setUp( self ):
+    #     self.main = Kernel
 
     def test_main_has_Kernel_object( self ):
-        pass
+        context = ApplicationContext(XMLConfig(contextFile))
+        self.assertTrue('Kernel' in context.objects)
 
 
 def main( ):
