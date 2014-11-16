@@ -38,11 +38,65 @@ def data_frame_size(LO, HI):
     if len(HI) != 8:
         HI = '0' + HI
     a = HI + LO
-    b = '0b' + a
-    c = bitstring.BitArray(b)
-    d = [c.uint, c.uintbe, c.uintle, c.uintne]
-    print("Размер данных пакета:",HI, LO, d)
+    c = bitstring.BitArray(bin=a)
+    d = (c.uint, c.uintbe, )
+    print("Размер данных пакета:", HI, LO, d)
     return d
+
+def block_type(header):
+    """
+    функция которая определяет тип блока: блок данных или блок комманд
+    и вызывает соответсвующие фукнции обработки блоков
+    """
+    if int(header[0]) == 0:
+        # Обрабатываем пакет как блок данных
+        #TODO: добавить обработку
+        print("Получили блок данные")
+    elif int(header[0]) == 1:
+        # Обрабатываем пакет как блок комманд
+        print("Получили блок с командой")
+        command_block(header)
+    else:
+        # Получили неизвестный или поврежденный блок
+        print("Получили неизвестный или поврежденный блок")
+
+def command_block(header):
+    """
+    В заголовке блока с командой обрабатываем команду
+    :param header: заголовок блока с командой
+    :return:
+    """
+    commands = {
+        '0' : 'M_NUL',  # Аргумент команды игнорируется (и, возможно, записывается в лог). Именно так передаем нодлистовую информацию, имя сисопа и т.д.
+        '1' : 'M_ADR'   # Список 5D адесов (через пробел)
+    }
+    cmd_num = str(bitstring.ConstBitArray(bin=header[3]).uintbe)
+    print("Получили команду: ", cmd_num)
+    if cmd_num in commands.keys():
+        print("Есть такая команда: ", commands[cmd_num], cmd_num)
+    else:
+        print("Нет такой команды")
+
+
+def recv_header(sock):
+    """
+    Читаем из сокета заголовок пакета
+    :param sock: подключенный сокет
+    :return: вернуть кортеж с полученным заголовком
+        в формате: (block_type, HI, LO)
+    """
+     # Читаем из сокета заголовок
+    data = sock.recv(3)
+    # формируем битовый поток
+    a = bitstring.BitStream(data)
+
+    # формируем шаблон битового потока
+    header_frame_template = ['bin:1','bin:7', 'bin:8', 'bin:8']
+    # читаем из битового потока согласно шаблону
+    block_header = tuple(a.readlist(header_frame_template))
+    print("Прочитали следующий заголовок: ", block_header)
+    block_type(block_header)
+    return block_header
 
 
 def main():
@@ -57,9 +111,7 @@ def main():
     sock = socket.socket()
     sock.connect(srv_port)
 
-
-    #TODO: Сделать функцию которая определяет тип блока: блок данных или командный блок
-    #TODO: Сделать функцию которая в принимет данные командных блоков, использовать словарь для команд
+    #TODO: Сделать функцию которая в принимет данные блоков комманд, использовать словарь для команд
     """
         Прочитали следующий заголовок:  ['1', '0000000', '00010001', '00000000']
         Размер данных пакета: ['00000000', '00010001', 17, 17, 4352, 4352]
@@ -83,7 +135,17 @@ def main():
         Размер данных пакета: ['00000000', '00010101', 21, 21, 5376, 5376]
         Прочитали следующее из блока данных:  b' 2:464/900.1@fidonet'
     """
-    # Читаем из сокета
+
+    header = recv_header(sock=sock)
+    # Читаем XXX байт из потока согласно вычисленному размеру блока данных
+    data_size = data_frame_size(HI=header[1], LO=header[2])[1] - 1
+    data = sock.recv(data_size)
+    print("Прочитали следующее из блока данных: ", data)
+
+
+    """
+    # Читаем следующий блок
+    # Читаем из сокета заголовок
     data = sock.recv(3)
     # формируем битовый поток
     a = bitstring.BitStream(data)
@@ -101,7 +163,7 @@ def main():
 
 
     # Читаем следующий блок
-    # Читаем из сокета
+    # Читаем из сокета заголовок
     data = sock.recv(3)
     # формируем битовый поток
     a = bitstring.BitStream(data)
@@ -119,7 +181,7 @@ def main():
 
 
     # Читаем следующий блок
-    # Читаем из сокета
+    # Читаем из сокета заголовок
     data = sock.recv(3)
     # формируем битовый поток
     a = bitstring.BitStream(data)
@@ -137,25 +199,7 @@ def main():
 
 
     # Читаем следующий блок
-    # Читаем из сокета
-    data = sock.recv(3)
-    # формируем битовый поток
-    a = bitstring.BitStream(data)
-
-    # формируем шаблон битового потока
-    start_frame = ['bin:1','bin:7', 'bin:8', 'bin:8']
-    # читаем из битового потока согласно шаблону
-    data = a.readlist(start_frame)
-    print("Прочитали следующий заголовок: ", data)
-
-    # Читаем XXX байт из потока согласно вычисленному размеру блока данных
-    data_size = data_frame_size(HI=data[1], LO=data[2])[1] - 1
-    data=sock.recv(data_size)
-    print("Прочитали следующее из блока данных: ", data)
-
-
-    # Читаем следующий блок
-    # Читаем из сокета
+    # Читаем из сокета заголовок
     data = sock.recv(3)
     # формируем битовый поток
     a = bitstring.BitStream(data)
@@ -172,7 +216,7 @@ def main():
     print("Прочитали следующее из блока данных: ", data)
 
     # Читаем следующий блок
-    # Читаем из сокета
+    # Читаем из сокета заголовок
     data = sock.recv(3)
     # формируем битовый поток
     a = bitstring.BitStream(data)
@@ -190,7 +234,7 @@ def main():
     print("Прочитали следующее из блока данных: ", data)
 
     # Читаем следующий блок
-    # Читаем из сокета
+    # Читаем из сокета заголовок
     data = sock.recv(3)
     # формируем битовый поток
     a = bitstring.BitStream(data)
@@ -205,7 +249,7 @@ def main():
     data_size = data_frame_size(HI=data[1], LO=data[2])[1] - 1
     data=sock.recv(data_size)
     print("Прочитали следующее из блока данных: ", data)
-
+    """
 
     sock.close()
 
