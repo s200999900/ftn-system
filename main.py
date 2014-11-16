@@ -1,13 +1,40 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
+"""
+Попытка реализовать binkp протокол на python
+
+"""
+
 __author__ = 'svelic'
 
 import socket
 import bitstring
 
-def data_frame_size(LO, HI):
 
+
+def data_frame_size(LO, HI):
+    """
+    Считаем размер блока данных
+    Пример:
+        >>> a = '00000000' + '00010100'
+        >>> len(a)
+        16
+        >>> b = '0b' + a
+        >>> len(b)
+        18
+        >>> c = bitstring.BitArray(b)
+        >>> c.uint
+        20
+        >>> c.uintbe
+        20
+    :param LO: значение байта LO из заголовка для командных фреймов(8бит)
+    :param HI: значение байта HI из заголовка для командных фреймов(7бит) - дополняем в начале 0 ! до длины в 8 бит !
+    :return:
+        возвращаем кортеж
+        пример: ['00000000', '00010100', 20, 20, 5120, 5120]
+        в формате: ['LO', 'HI', uint, uintbe(Big-endian), uintle(Little-endian), uintne(Native-endian)]
+    """
     if len(HI) != 8:
         HI = '0' + HI
     a = HI + LO
@@ -19,6 +46,10 @@ def data_frame_size(LO, HI):
 
 
 def main():
+    """
+
+    """
+
     # server = "192.168.1.104"
     server = "127.0.0.1"
     port = 24554
