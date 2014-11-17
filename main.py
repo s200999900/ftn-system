@@ -101,7 +101,7 @@ def recv_header(sock):
 
 def main():
     """
-
+    Run binkd server: sbin/binkd -s -v -m -r etc/binkd.config
     """
 
     # server = "192.168.1.104"
