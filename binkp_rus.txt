@@ -91,20 +91,20 @@ M_SKIP 10
 Типичная сессия между двумя binkd
 
 вызвающая система посылает	вызываемая система посылает
-M_NUL "SYS ..."	M_NUL "SYS ..."
-M_NUL "ZYZ ..."	M_NUL "ZYZ ..."
-M_NUL "LOC ..."	M_NUL "LOC ..."
-M_NUL "VER ..."	M_NUL "VER ..."
-M_ADR "2:2/2.2@fidonet"	M_ADR "3:3/3.3@fidonet"
-M_PWD "password"	(ждем пароля от remote)
-M_OK "" или M_ERR "Bad password"
-(ждем M_OK)	M_FILE "file2 200 42342434 0"
-M_FILE "file1 100 423424244 0"	data
-data	data
-data	data
-M_EOB	(получили file1 целиком, подтверждаем)
+M_NUL "SYS ..."	                        M_NUL "SYS ..."
+M_NUL "ZYZ ..."	                        M_NUL "ZYZ ..."
+M_NUL "LOC ..."	                        M_NUL "LOC ..."
+M_NUL "VER ..."	                        M_NUL "VER ..."
+M_ADR "2:2/2.2@fidonet"	                M_ADR "3:3/3.3@fidonet"
+M_PWD "password"	                    (ждем пароля от remote)
+                                        M_OK "" или M_ERR "Bad password"
+(ждем M_OK)	                            M_FILE "file2 200 42342434 0"
+M_FILE "file1 100 423424244 0"	        data
+data	                                data
+data	                                data
+M_EOB	                                (получили file1 целиком, подтверждаем)
 (получили file2 целиком, подтверждаем)	M_GOT "file1 100 423424244"
-M_GOT "file2 200 42342434"	data
+M_GOT "file2 200 42342434"	            data
 M_EOB
 © Copyright 1996-97 by Dima Maloff
 $Id: binkp.html,v 1.5 1998/10/08 07:31:48 maloff Exp $
