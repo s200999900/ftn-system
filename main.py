@@ -52,13 +52,15 @@ def block_type(header):
         # Обрабатываем пакет как блок данных
         #TODO: добавить обработку
         print("Получили блок данные")
+        return 0
     elif int(header[0]) == 1:
         # Обрабатываем пакет как блок комманд
         print("Получили блок с командой")
-        command_block(header)
+        return 1
     else:
         # Получили неизвестный или поврежденный блок
         print("Получили неизвестный или поврежденный блок")
+        return None
 
 def command_block(header):
     """
@@ -71,11 +73,12 @@ def command_block(header):
         '1' : 'M_ADR'   # Список 5D адесов (через пробел)
     }
     cmd_num = str(bitstring.ConstBitArray(bin=header[3]).uintbe)
-    print("Получили команду: ", cmd_num)
     if cmd_num in commands.keys():
-        print("Есть такая команда: ", commands[cmd_num], cmd_num)
+        print("Получили команду: ", commands[cmd_num], cmd_num)
+        return cmd_num
     else:
-        print("Нет такой команды")
+        print("Получили неизвестную команду!")
+        return None
 
 
 def recv_header(sock):
@@ -94,10 +97,26 @@ def recv_header(sock):
     header_frame_template = ['bin:1','bin:7', 'bin:8', 'bin:8']
     # читаем из битового потока согласно шаблону
     block_header = tuple(a.readlist(header_frame_template))
-    print("Прочитали следующий заголовок: ", block_header)
-    block_type(block_header)
+    print("Прочитали заголовок блока: ", block_header)
     return block_header
 
+def recv_data(sock, header):
+    """
+    Читаем блок данных из коммандного блока
+    :param sock: сокет
+    :param data_size: размер блока данных
+    :return: блок данных
+    """
+    # Читаем XXX байт из потока согласно вычисленному размеру блока данных
+    data_size = data_frame_size(HI=header[1], LO=header[2])[1] - 1
+    data = sock.recv(data_size)
+
+    if data:
+        print("Прочитали из блока данных: ", data)
+        return data
+    else:
+        print("Нет данных в блоке данных")
+        return None
 
 def main():
     """
@@ -136,11 +155,21 @@ def main():
         Прочитали следующее из блока данных:  b' 2:464/900.1@fidonet'
     """
 
+    # Организовать цикл
+    # Который будет читать данные из потока пока не встретится неизвестная команда ()
+    # или не блок с командами
+
+
     header = recv_header(sock=sock)
-    # Читаем XXX байт из потока согласно вычисленному размеру блока данных
-    data_size = data_frame_size(HI=header[1], LO=header[2])[1] - 1
-    data = sock.recv(data_size)
-    print("Прочитали следующее из блока данных: ", data)
+    block_t = block_type(header)
+    if block_t == 0:
+        # обрабатываем блок данных
+        # TODO: Сделать функцию обработки приема блоков данных
+        pass
+    else:
+        command_block(header)
+        block_data = recv_data(sock, header)
+
 
 
     """
