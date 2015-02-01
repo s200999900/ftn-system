@@ -48,7 +48,7 @@ class BinkpConnection (object):
 
         s.connect((self.addr, int(self.port)))
 
-    def read_bytes(self, want):
+    def __read_bytes(self, want):
         bytes = self.sock.recv(want)
 
         while len(bytes) < want:
@@ -60,18 +60,18 @@ class BinkpConnection (object):
         return bytes
 
     def read_frame (self):
-        bytes = self.read_bytes(2)
+        bytes = self.__read_bytes(2)
         frame_header = struct.unpack('>H', bytes)[0]
         cmd_frame = frame_header & 0x8000
         data_len = frame_header & ~0x8000
 
         if cmd_frame:
-            cmd_id = struct.unpack('b', self.read_bytes(1))[0]
+            cmd_id = struct.unpack('b', self.__read_bytes(1))[0]
             cmd_id = cmd_ids[cmd_id]
-            data = self.read_bytes(data_len - 1)
+            data = self.__read_bytes(data_len - 1)
         else:
             cmd_id = None
-            data = self.read_bytes(data_len)
+            data = self.__read_bytes(data_len)
 
         return {'command': bool(cmd_frame),
                 'cmd_id': cmd_id,
@@ -79,7 +79,6 @@ class BinkpConnection (object):
 
     def send_cmd_frame(self, cmd_id, data=b''):
         cmd_id = cmd_names[cmd_id]
-        # data = struct.pack('b', cmd_id) + data
         data = struct.pack('b', cmd_id) + data
         data_len = len(data)
         frame_header = data_len | 0x8000
