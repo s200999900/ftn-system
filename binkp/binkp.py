@@ -29,14 +29,20 @@ class ConnectionClosed(Exception):
 
 class BinkpConnection (object):
 
-    def __init__ (self, addr, timeout=None):
-        try:
-            self.addr, self.port = addr
-        except ValueError:
-            (self.addr,) = addr
-            self.port = DEFAULT_BINKP_PORT
+    def __init__ (self, addr=None, port=DEFAULT_BINKP_PORT, timeout=None):
+        # try:
+        #     self.addr, self.port = addr
+        # except ValueError:
+        #     (self.addr,) = addr
+        #     self.port = DEFAULT_BINKP_PORT
 
+        self.addr = addr
+        self.port = port
         self.timeout = timeout
+
+        self.ip = None
+        self.sock = None
+        self.codepage='utf-8'
 
     def connect(self):
         self.ip = socket.gethostbyname(self.addr)
@@ -49,19 +55,19 @@ class BinkpConnection (object):
         s.connect((self.addr, int(self.port)))
 
     def __read_bytes(self, want):
-        bytes = self.sock.recv(want)
+        r_bytes = self.sock.recv(want)
 
-        while len(bytes) < want:
-            more = self.sock.recv(want - len(bytes))
+        while len(r_bytes) < want:
+            more = self.sock.recv(want - len(r_bytes))
             if not more:
                 raise ConnectionClosed()
-            bytes += more
+            r_bytes += more
 
-        return bytes
+        return r_bytes
 
-    def read_frame (self):
-        bytes = self.__read_bytes(2)
-        frame_header = struct.unpack('>H', bytes)[0]
+    def read_frame(self):
+        r_bytes = self.__read_bytes(2)
+        frame_header = struct.unpack('>H', r_bytes)[0]
         cmd_frame = frame_header & 0x8000
         data_len = frame_header & ~0x8000
 
@@ -69,15 +75,18 @@ class BinkpConnection (object):
             cmd_id = struct.unpack('b', self.__read_bytes(1))[0]
             cmd_id = cmd_ids[cmd_id]
             data = self.__read_bytes(data_len - 1)
+            data = data.decode(self.codepage)
         else:
             cmd_id = None
             data = self.__read_bytes(data_len)
 
-        return {'command': bool(cmd_frame),
+        return {'cmd': bool(cmd_frame),
                 'cmd_id': cmd_id,
                 'data': data}
 
-    def send_cmd_frame(self, cmd_id, data=b''):
+    def send_cmd_frame(self, cmd_id, data=None):
+        data = data.encode(self.codepage)
+
         cmd_id = cmd_names[cmd_id]
         data = struct.pack('b', cmd_id) + data
         data_len = len(data)
@@ -100,7 +109,8 @@ if __name__ == '__main__':
     user = "127.0.0.1"
     # user = "192.168.1.104"
 
-    b = BinkpConnection(user.split(':'), timeout=10)
+    # b = BinkpConnection(user.split(':'), timeout=10)
+    b = BinkpConnection(addr='127.0.0.1', port=DEFAULT_BINKP_PORT, timeout=10)
 
     b.connect()
 
@@ -176,7 +186,7 @@ if __name__ == '__main__':
                 recv_fname, recv_fsize, recv_futime, recv_fpos)
             )
 
-        elif not frame['cmd_id'] and frame['command'] is False:
+        elif not frame['cmd_id'] and frame['cmd'] is False:
 
             if not os.path.isfile(recv_fname):
                 recv_fdescr = open(recv_fname, mode='wb')
