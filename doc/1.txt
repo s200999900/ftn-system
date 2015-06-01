@@ -1,0 +1,18 @@
+$
+echo "This is a test." | ftn-makemsg \
+    --from 'Test900_1' \
+    --to 'Someone' \
+    --orig 2:464/900.1 \
+    --dest 2:464/900.777 \
+    --subject "An exciting subject" \
+    --flag killSent \
+    --flag private > new.msg
+
+ftn-pack -d 2:464/900.777 -o 2:464/900.1 -D ~svelic/macfidoip/out/01d00384.pnt/ -V new.msg
+
+bash-3.2$ ftn-pack -d 2:464/900.777 -o 2:464/900.1 -D ~svelic/macfidoip/out/01d00384.pnt -v new.msg
+2014-12-25 23:00:06 pack:INFO [13895] packed message from Test900_1 @ 2:464/900.1 to Someone @ 2:464/900.777
+2014-12-25 23:00:06 pack:INFO [13895] packed 1 messages into /Users/svelic/macfidoip/out/01d00384.pnt/01d00384.out.
+
+~/macfidoip/sbin/binkd -s ~/macfidoip/etc/binkd.config
+
