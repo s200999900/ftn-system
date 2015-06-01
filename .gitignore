@@ -1,12 +1,16 @@
+<<<<<<< HEAD
 # Created by .gitignore support plugin (hsz.mobi)
 ### Python template
 # Byte-compiled / optimized / DLL files
 __pycache__/
+=======
+>>>>>>> 2166ce83ef9953e17903bb4879ed70158ab4e8a5
 *.py[cod]
 
 # C extensions
 *.so
 
+<<<<<<< HEAD
 # Distribution / packaging
 .Python
 env/
@@ -55,3 +59,35 @@ target/
 
 
 temp
+=======
+# Packages
+*.egg
+*.egg-info
+dist
+build
+eggs
+parts
+bin
+var
+sdist
+develop-eggs
+.installed.cfg
+lib
+lib64
+
+# Installer logs
+pip-log.txt
+
+# Unit test / coverage reports
+.coverage
+.tox
+nosetests.xml
+
+# Translations
+*.mo
+
+# Mr Developer
+.mr.developer.cfg
+.project
+.pydevproject
+>>>>>>> 2166ce83ef9953e17903bb4879ed70158ab4e8a5
